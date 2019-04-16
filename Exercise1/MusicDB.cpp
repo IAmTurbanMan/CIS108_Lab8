@@ -6,6 +6,7 @@
 #include <id3/tag.h>
 #include "MusicDB.h"
 #include "Song.h"
+#include <id3/misc_support.h>
 
 using namespace std;
 
@@ -242,7 +243,38 @@ void sortTitle()
 
 void importSong(string songName)
 {
+	const ID3_Tag song;
+	ID3_Frame* songFrame = song.Find(ID3FID_TITLE, ID3FN_TEXT, songName);
 	
-	ID3_Tag song(string songName + ".mp3");
-
+	aSong.title = ID3_GetTitle(song)
 }
+
+//char *ID3_GetString(const ID3_Frame *frame, ID3_FieldID fieldName, size_t nIndex)
+//{
+//	char *text = NULL;
+//	if (NULL != frame)
+//	{
+//		size_t nText = frame->GetField(fieldName)->Size();
+//		text = new char[nText + 1];
+//		frame->GetField(fieldName)->Get(text, nText + 1, nIndex);
+//	}
+//	return text;
+//}
+//
+//char *ID3_GetArtist(const ID3_Tag *tag)
+//{
+//	char *songArtist = NULL;
+//	if (NULL == tag)
+//	{
+//		return songArtist;
+//	}
+//
+//	ID3_Frame *frame = NULL;
+//	if ((frame = tag->Find(ID3FID_LEADARTIST)) ||
+//		(frame = tag->Find(ID3FID_BAND)) ||
+//		(frame = tag->Find(ID3FID_CONDUCTOR)) ||
+//		(frame = tag->Find(ID3FID_COMPOSER)))
+//	{
+//		songArtist = ID3_GetString(frame, ID3FN_TEXT)
+//	}
+//}
