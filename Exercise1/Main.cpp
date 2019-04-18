@@ -83,11 +83,7 @@ int main()
 
 		if (selection == "import")
 		{
-			cout << "What song would you like to import? :\n";
-			string songName;
-			cin >> songName;
-			importSong(songName);
-			
+			importSong();
 		}
 
 		if (selection == "help")

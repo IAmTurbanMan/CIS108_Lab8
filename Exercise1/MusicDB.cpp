@@ -4,9 +4,9 @@
 #include <vector>
 #include <algorithm>
 #include <id3/tag.h>
+#include <id3/misc_support.h>
 #include "MusicDB.h"
 #include "Song.h"
-#include <id3/misc_support.h>
 
 using namespace std;
 
@@ -241,40 +241,94 @@ void sortTitle()
 //}
 
 
-void importSong(string songName)
+void importSong()
 {
-	const ID3_Tag song;
-	ID3_Frame* songFrame = song.Find(ID3FID_TITLE, ID3FN_TEXT, songName);
-	
-	aSong.title = ID3_GetTitle(song)
-}
+	try
+	{
+		cout << "Please enter a file name: ";
+		string mp3File;
+		cin >> mp3File;
 
-//char *ID3_GetString(const ID3_Frame *frame, ID3_FieldID fieldName, size_t nIndex)
-//{
-//	char *text = NULL;
-//	if (NULL != frame)
-//	{
-//		size_t nText = frame->GetField(fieldName)->Size();
-//		text = new char[nText + 1];
-//		frame->GetField(fieldName)->Get(text, nText + 1, nIndex);
-//	}
-//	return text;
-//}
-//
-//char *ID3_GetArtist(const ID3_Tag *tag)
-//{
-//	char *songArtist = NULL;
-//	if (NULL == tag)
-//	{
-//		return songArtist;
-//	}
-//
-//	ID3_Frame *frame = NULL;
-//	if ((frame = tag->Find(ID3FID_LEADARTIST)) ||
-//		(frame = tag->Find(ID3FID_BAND)) ||
-//		(frame = tag->Find(ID3FID_CONDUCTOR)) ||
-//		(frame = tag->Find(ID3FID_COMPOSER)))
-//	{
-//		songArtist = ID3_GetString(frame, ID3FN_TEXT)
-//	}
-//}
+		ID3_Tag song(mp3File.c_str());  //looked to see how Vasilije did it.
+		ID3_Tag* songImport = &song;
+
+		char* title = ID3_GetTitle(songImport);
+		char* artist = ID3_GetArtist(songImport);
+		char* album = ID3_GetAlbum(songImport);
+		char* track = ID3_GetTrack(songImport);
+		char* releaseYear = ID3_GetYear(songImport);
+		char* genre = ID3_GetGenre(songImport);
+		
+		strcpy_s(aSong.title, title);
+		strcpy_s(aSong.artist, artist);
+		strcpy_s(aSong.album, album);
+		aSong.track = stoi(track);
+		aSong.releaseYear = stoi(releaseYear);
+
+		string genreString;
+		genreString = genre;
+		transform(genreString.begin(), genreString.end(), genreString.begin(), ::tolower);
+
+		if (genreString == "blues")
+		{
+			aSong.genre = aSong.Blues;
+		}
+
+		else if (genreString == "electronic")
+		{
+			aSong.genre = aSong.Electronic;
+		}
+
+		else if (genreString == "country")
+		{
+			aSong.genre = aSong.Country;
+		}
+
+		else if (genreString == "folk")
+		{
+			aSong.genre = aSong.Folk;
+		}
+
+		else if (genreString == "hip hop" || genreString == "hiphop")
+		{
+			aSong.genre = aSong.HipHop;
+		}
+
+		else if (genreString == "jazz")
+		{
+			aSong.genre = aSong.Jazz;
+		}
+
+		else if (genreString == "latin")
+		{
+			aSong.genre = aSong.Latin;
+		}
+
+		else if (genreString == "pop")
+		{
+			aSong.genre = aSong.Pop;
+		}
+
+		else if (genreString == "rock")
+		{
+			aSong.genre = aSong.Rock;
+		}
+
+		ID3_FreeString(title);
+		ID3_FreeString(album);
+		ID3_FreeString(artist);
+		ID3_FreeString(track);
+		ID3_FreeString(releaseYear);
+		ID3_FreeString(genre);
+
+		mySongs.push_back(aSong);
+
+		cout << title << " has been imported to the database.\n";
+	}
+
+	catch (const exception &exc)
+	{
+		cout << "Failed to import the song.\n";
+		(void)exc;
+	}
+}

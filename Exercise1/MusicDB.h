@@ -21,7 +21,7 @@ void sortArtist();
 
 void sortTitle();
 
-void importSong(string songName);
+void importSong();
 
 //void findSong();
 
