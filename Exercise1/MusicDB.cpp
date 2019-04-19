@@ -240,33 +240,34 @@ void sortTitle()
 //	find_if(mySongs.begin(), mySongs.end(), );
 //}
 
-
 void importSong()
 {
 	try
 	{
-		cout << "Please enter a file name: ";
+		cout << "Please enter a file path: ";
 		string mp3File;
 		cin >> mp3File;
 
-		ID3_Tag song(mp3File.c_str());  //looked to see how Vasilije did it.
+		ID3_Tag song;
+		song.Link(mp3File.c_str(), ID3TT_ID3V2);
+
 		ID3_Tag* songImport = &song;
 
-		char* title = ID3_GetTitle(songImport);
-		char* artist = ID3_GetArtist(songImport);
-		char* album = ID3_GetAlbum(songImport);
-		char* track = ID3_GetTrack(songImport);
-		char* releaseYear = ID3_GetYear(songImport);
-		char* genre = ID3_GetGenre(songImport);
-		
-		strcpy_s(aSong.title, title);
-		strcpy_s(aSong.artist, artist);
-		strcpy_s(aSong.album, album);
-		aSong.track = stoi(track);
-		aSong.releaseYear = stoi(releaseYear);
+		char* importTitle = ID3_GetTitle(songImport);
+		char* importArtist = ID3_GetArtist(songImport);
+		char* importAlbum = ID3_GetAlbum(songImport);
+		char* importTrack = ID3_GetTrack(songImport);
+		char* importReleaseYear = ID3_GetYear(songImport);
+		char* importGenre = ID3_GetGenre(songImport);
+
+		strcpy_s(aSong.title, importTitle);
+		strcpy_s(aSong.artist, importArtist);
+		strcpy_s(aSong.album, importAlbum);
+		aSong.track = stoi(importTrack);
+		aSong.releaseYear = stoi(importReleaseYear);
 
 		string genreString;
-		genreString = genre;
+		genreString = importGenre;
 		transform(genreString.begin(), genreString.end(), genreString.begin(), ::tolower);
 
 		if (genreString == "blues")
@@ -313,17 +314,17 @@ void importSong()
 		{
 			aSong.genre = aSong.Rock;
 		}
-
-		ID3_FreeString(title);
-		ID3_FreeString(album);
-		ID3_FreeString(artist);
-		ID3_FreeString(track);
-		ID3_FreeString(releaseYear);
-		ID3_FreeString(genre);
+	
+		ID3_FreeString(importTitle);
+		ID3_FreeString(importAlbum);
+		ID3_FreeString(importArtist);
+		ID3_FreeString(importTrack);
+		ID3_FreeString(importReleaseYear);
+		ID3_FreeString(importGenre);
 
 		mySongs.push_back(aSong);
 
-		cout << title << " has been imported to the database.\n";
+		cout << importTitle << " has been imported to the database.\n";
 	}
 
 	catch (const exception &exc)
