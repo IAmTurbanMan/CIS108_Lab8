@@ -242,94 +242,235 @@ void sortTitle()
 
 void importSong()
 {
+	string mp3File;
+	cout << "Enter the path of the song you would like to import: ";
+	cin >> mp3File;
+	cout << "\n";
+
+	ID3_Tag songTag;
 	try
 	{
-		cout << "Please enter a file path: ";
-		string mp3File;
-		cin >> mp3File;
-
-		ID3_Tag song;
-		song.Link(mp3File.c_str(), ID3TT_ID3V2);
-
-		ID3_Tag* songImport = &song;
-
-		char* importTitle = ID3_GetTitle(songImport);
-		char* importArtist = ID3_GetArtist(songImport);
-		char* importAlbum = ID3_GetAlbum(songImport);
-		char* importTrack = ID3_GetTrack(songImport);
-		char* importReleaseYear = ID3_GetYear(songImport);
-		char* importGenre = ID3_GetGenre(songImport);
-
-		strcpy_s(aSong.title, importTitle);
-		strcpy_s(aSong.artist, importArtist);
-		strcpy_s(aSong.album, importAlbum);
-		aSong.track = stoi(importTrack);
-		aSong.releaseYear = stoi(importReleaseYear);
-
-		string genreString;
-		genreString = importGenre;
-		transform(genreString.begin(), genreString.end(), genreString.begin(), ::tolower);
-
-		if (genreString == "blues")
-		{
-			aSong.genre = aSong.Blues;
-		}
-
-		else if (genreString == "electronic")
-		{
-			aSong.genre = aSong.Electronic;
-		}
-
-		else if (genreString == "country")
-		{
-			aSong.genre = aSong.Country;
-		}
-
-		else if (genreString == "folk")
-		{
-			aSong.genre = aSong.Folk;
-		}
-
-		else if (genreString == "hip hop" || genreString == "hiphop")
-		{
-			aSong.genre = aSong.HipHop;
-		}
-
-		else if (genreString == "jazz")
-		{
-			aSong.genre = aSong.Jazz;
-		}
-
-		else if (genreString == "latin")
-		{
-			aSong.genre = aSong.Latin;
-		}
-
-		else if (genreString == "pop")
-		{
-			aSong.genre = aSong.Pop;
-		}
-
-		else if (genreString == "rock")
-		{
-			aSong.genre = aSong.Rock;
-		}
-	
-		ID3_FreeString(importTitle);
-		ID3_FreeString(importAlbum);
-		ID3_FreeString(importArtist);
-		ID3_FreeString(importTrack);
-		ID3_FreeString(importReleaseYear);
-		ID3_FreeString(importGenre);
-
-		mySongs.push_back(aSong);
-
-		cout << importTitle << " has been imported to the database.\n";
+		songTag.Link(mp3File.c_str(), ID3TT_ID3V1 | ID3TT_LYRICS3V2 | ID3TT_MUSICMATCH);
 	}
-
-	catch (const exception &exc)
+	catch (...)
 	{
-		cout << "Failed to import the song.\n";
-		(void)exc;
+		throw new exception("Failed to load MP3 file");
 	}
+
+	if (songTag.GetFileSize() == 0)
+	{
+		throw new exception("Failed to load MP3 file");
+	}
+
+	ID3_Frame* titleFrame = songTag.Find(ID3FID_TITLE);
+	if (NULL != titleFrame)
+	{
+		ID3_Field* titleField = titleFrame->GetField(ID3FN_TEXT);
+		titleField->Get(aSong.title, 64);
+		aSong.title[64 - 1] = '\0';
+	}
+
+	//ID3_Tag* songImport = &songTag;
+
+	char* importTitle = ID3_GetTitle(&songTag);
+	char* importArtist = ID3_GetArtist(&songTag);
+	char* importAlbum = ID3_GetAlbum(&songTag);
+	char* importTrack = ID3_GetTrack(&songTag);
+	char* importReleaseYear = ID3_GetYear(&songTag);
+	char* importGenre = ID3_GetGenre(&songTag);
+
+	strcpy_s(aSong.title, importTitle);
+	strcpy_s(aSong.artist, importArtist);
+	strcpy_s(aSong.album, importAlbum);
+	aSong.track = stoi(importTrack);
+	aSong.releaseYear = stoi(importReleaseYear);
+
+	string genreString;
+	genreString = importGenre;
+	transform(genreString.begin(), genreString.end(), genreString.begin(), ::tolower);
+
+	aSong.genre = aSong.Unknown;
+
+	if (genreString == "blues")
+	{
+		aSong.genre = aSong.Blues;
+	}
+
+	else if (genreString == "electronic")
+	{
+		aSong.genre = aSong.Electronic;
+	}
+
+	else if (genreString == "country")
+	{
+		aSong.genre = aSong.Country;
+	}
+
+	else if (genreString == "folk")
+	{
+		aSong.genre = aSong.Folk;
+	}
+
+	else if (genreString == "hip hop" || genreString == "hiphop")
+	{
+	aSong.genre = aSong.HipHop;
+	}
+
+	else if (genreString == "jazz")
+	{
+		aSong.genre = aSong.Jazz;
+	}
+
+	else if (genreString == "latin")
+	{
+		aSong.genre = aSong.Latin;
+	}
+
+	else if (genreString == "pop")
+	{
+		aSong.genre = aSong.Pop;
+	}
+
+	else if (genreString == "rock")
+	{
+		aSong.genre = aSong.Rock;
+	}
+	
+	ID3_FreeString(importTitle);
+	ID3_FreeString(importAlbum);
+	ID3_FreeString(importArtist);
+	ID3_FreeString(importTrack);
+	ID3_FreeString(importReleaseYear);
+	ID3_FreeString(importGenre);
+
+	mySongs.push_back(aSong);
+
+	cout << importTitle << " has been imported to the database.\n";
 }
+	
+	
+	/*ID3_Tag song_tag;
+	try
+	{
+		song_tag.Link(mp3_file.c_str(), ID3TT_ID3V1 | ID3TT_LYRICS3V2 | ID3TT_MUSICMATCH);
+	}
+	catch (...)
+	{
+		throw new exception("Failed to load MP3 file");
+	}
+
+	if (song_tag.GetFileSize() == 0)
+	{
+		throw new exception("Failed to load MP3 file");
+	}
+
+	metadata::Song aSong;
+	memset(&aSong, 0, sizeof(aSong));
+	strncpy_s(aSong.title, UNKNOWN, 64);
+	strncpy_s(aSong.artist, UNKNOWN, 32);
+	strncpy_s(aSong.album, UNKNOWN, 64);
+
+	auto title_tag_frame = song_tag.Find(ID3FID_TITLE);
+	if (title_tag_frame != NULL)
+	{
+		auto title_tag_field = title_tag_frame->GetField(ID3FN_TEXT);
+		title_tag_field->Get(aSong.title, 64);
+		aSong.title[64 - 1] = '\0';
+	}
+
+	auto artist_tag_frame = song_tag.Find(ID3FID_ORIGARTIST);
+	if (artist_tag_frame == NULL)
+		artist_tag_frame = song_tag.Find(ID3FID_LEADARTIST);
+	if (artist_tag_frame == NULL)
+		artist_tag_frame = song_tag.Find(ID3FID_MIXARTIST);
+	if (artist_tag_frame == NULL)
+		artist_tag_frame = song_tag.Find(ID3FID_WWWARTIST);
+	if (artist_tag_frame != NULL)
+	{
+		auto artist_tag_field = artist_tag_frame->GetField(ID3FN_TEXT);
+		artist_tag_field->Get(aSong.artist, 32);
+		aSong.artist[32 - 1] = '\0';
+	}
+
+	auto album_tag_frame = song_tag.Find(ID3FID_ALBUM);
+	if (album_tag_frame != NULL)
+	{
+		auto album_tag_field = album_tag_frame->GetField(ID3FN_TEXT);
+		album_tag_field->Get(aSong.album, 64);
+		aSong.album[64 - 1] = '\0';
+	}
+
+	auto track_tag_frame = song_tag.Find(ID3FID_TRACKNUM);
+	if (track_tag_frame != NULL)
+	{
+		char track_num[32];
+		auto track_tag_field = track_tag_frame->GetField(ID3FN_TEXT);
+		track_tag_field->Get(track_num, 32);
+		aSong.track = ::strtoul(track_num, NULL, 10);
+	}
+
+	auto year_tag_frame = song_tag.Find(ID3FID_YEAR);
+	if (year_tag_frame == NULL)
+		year_tag_frame = song_tag.Find(ID3FID_ORIGYEAR);
+	if (year_tag_frame != NULL)
+	{
+		char year[32];
+		auto year_tag_field = year_tag_frame->GetField(ID3FN_TEXT);
+		year_tag_field->Get(year, 32);
+		aSong.releaseYear = ::strtoul(year, NULL, 10);
+	}
+
+	auto genre = ID3_GetGenreNum(&song_tag);
+
+	string genreString = ID3_V1GENRE2DESCRIPTION(genre);
+	transform(genreString.begin(), genreString.end(), genreString.begin(), ::tolower);
+
+	aSong.genre = aSong.Unknown;
+
+	if (genreString == "blues")
+	{
+		aSong.genre = aSong.Blues;
+	}
+
+	else if (genreString == "electronic")
+	{
+		aSong.genre = aSong.Electronic;
+	}
+
+	else if (genreString == "country")
+	{
+		aSong.genre = aSong.Country;
+	}
+
+	else if (genreString == "folk")
+	{
+		aSong.genre = aSong.Folk;
+	}
+
+	else if (genreString == "hip hop" || genreString == "hiphop")
+	{
+		aSong.genre = aSong.HipHop;
+	}
+
+	else if (genreString == "jazz")
+	{
+		aSong.genre = aSong.Jazz;
+	}
+
+	else if (genreString == "latin")
+	{
+		aSong.genre = aSong.Latin;
+	}
+
+	else if (genreString == "pop")
+	{
+		aSong.genre = aSong.Pop;
+	}
+
+	else if (genreString == "rock")
+	{
+		aSong.genre = aSong.Rock;
+	}
+}*/
+
+	// add the song to the database
